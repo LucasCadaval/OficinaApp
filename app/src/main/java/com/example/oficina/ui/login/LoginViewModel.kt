@@ -1,25 +1,23 @@
 package com.example.oficina.ui.login
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
 
 class LoginViewModel : ViewModel() {
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    var isLoading = false
+    var loginErrorMessage: String? = null
         private set
 
-    var isLoginSuccessful = false
-        private set
-
-    fun login(email: String, password: String, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            isLoading = true
-            delay(2000) // Simula uma chamada de API
-            isLoading = false
-            isLoginSuccessful = email == "admin@example.com" && password == "123456"
-            onResult(isLoginSuccessful)
-        }
+    fun loginWithEmailAndPassword(email: String, password: String, onLoginResult: (Boolean) -> Unit) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onLoginResult(true)
+                } else {
+                    loginErrorMessage = task.exception?.localizedMessage ?: "Erro desconhecido"
+                    onLoginResult(false)
+                }
+            }
     }
 }
