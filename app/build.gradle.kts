@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.gms.google-services")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -69,9 +70,17 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation ("androidx.compose.material3:material3:1.1.1")
-    implementation ("androidx.navigation:navigation-compose:2.6.0")
+    // Compose
+    implementation("androidx.compose.material3:material3:1.1.1")
+    implementation("androidx.navigation:navigation-compose:2.6.0")
 
+    // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
     implementation("com.google.firebase:firebase-analytics")
+
+    // Banco SQLite
+    implementation("androidx.room:room-runtime:2.5.2")
+    ksp("androidx.room:room-compiler:2.5.2")
+    implementation("androidx.room:room-ktx:2.5.2")
+
 }

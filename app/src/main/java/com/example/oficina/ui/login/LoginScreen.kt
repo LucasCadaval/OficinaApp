@@ -11,6 +11,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -18,13 +19,14 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = LoginViewModel(),
-    onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onLoginSuccess: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -54,21 +56,18 @@ fun LoginScreen(
             Button(
                 onClick = {
                     isLoading = true
-                    viewModel.loginWithEmailAndPassword(email, password) { success ->
+                    viewModel.loginWithEmailAndPassword(context, email, password) { success ->
                         isLoading = false
                         if (success) {
                             onLoginSuccess()
                         } else {
-                            errorMessage = viewModel.loginErrorMessage ?: "Erro ao fazer login"
+                            errorMessage = "Erro ao fazer login"
                         }
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Entrar")
-            }
-            TextButton(onClick = { onNavigateToRegister() }) {
-                Text("Criar uma conta")
             }
             if (errorMessage.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -80,6 +79,7 @@ fun LoginScreen(
         }
     }
 }
+
 
 
 
