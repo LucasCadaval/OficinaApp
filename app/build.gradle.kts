@@ -73,10 +73,12 @@ dependencies {
     // Compose
     implementation("androidx.compose.material3:material3:1.1.1")
     implementation("androidx.navigation:navigation-compose:2.6.0")
+    implementation("androidx.compose.runtime:runtime:1.5.1")
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-firestore-ktx:24.5.0")
 
     // Banco SQLite
     implementation("androidx.room:room-runtime:2.5.2")
