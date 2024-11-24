@@ -1,5 +1,6 @@
 package com.example.oficina.ui.veiculos
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,22 +12,37 @@ import com.example.oficina.models.Veiculo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VeiculosScreen(viewModel: VeiculosViewModel, onAddVeiculo: () -> Unit) {
+fun VeiculosScreen(
+    viewModel: VeiculosViewModel,
+    onAddVeiculo: () -> Unit,
+    onVeiculoClick: (Veiculo) -> Unit
+) {
     val veiculos by viewModel.veiculos.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text("Veículos") },
-            actions = {
-                Button(onClick = onAddVeiculo) {
-                    Text("Novo Veículo")
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Veículos") },
+                actions = {
+                    Button(onClick = onAddVeiculo) {
+                        Text("Novo Veículo")
+                    }
                 }
-            }
-        )
-        LazyColumn(modifier = Modifier.padding(16.dp)) {
+            )
+        }
+    ) { innerPadding ->
+        LazyColumn(modifier = Modifier.padding(innerPadding)) {
             items(veiculos) { veiculo ->
-                Text(veiculo.nome)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onVeiculoClick(veiculo) } // Chama a função de callback ao clicar
+                        .padding(16.dp)
+                ) {
+                    Text(veiculo.nome)
+                }
             }
         }
     }
 }
+
