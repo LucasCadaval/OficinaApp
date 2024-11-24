@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.oficina.data.AppDatabase
@@ -22,7 +24,10 @@ import com.example.oficina.ui.veiculos.NovoVeiculoScreen
 import com.example.oficina.ui.veiculos.VeiculosScreen
 import com.example.oficina.ui.veiculos.VeiculosViewModel
 import com.example.oficina.ui.veiculos.VeiculoDetailScreen
-import androidx.compose.material.icons.filled.AccountCircle
+import com.example.oficina.ui.ordens.OrdemServicoScreen
+import com.example.oficina.ui.ordens.OrdemServicoViewModel
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Text
 
 class MainActivity : ComponentActivity() {
@@ -32,9 +37,14 @@ class MainActivity : ComponentActivity() {
             val context = applicationContext
             var isLoggedIn by remember { mutableStateOf(false) }
             var selectedItem by remember { mutableStateOf<NavigationItem?>(null) }
-            var currentScreen by remember { mutableStateOf("main") }
+            var currentScreen by remember { mutableStateOf("home") }
             var selectedCliente by remember { mutableStateOf<Cliente?>(null) }
             var selectedVeiculo by remember { mutableStateOf<Veiculo?>(null) }
+
+            // ViewModels
+            val ordemViewModel: OrdemServicoViewModel = viewModel()
+            val clientesViewModel: ClientesViewModel = viewModel()
+            val veiculosViewModel: VeiculosViewModel = viewModel()
 
             // Verifica se o usuário está logado ao iniciar
             LaunchedEffect(Unit) {
@@ -42,7 +52,8 @@ class MainActivity : ComponentActivity() {
                 isLoggedIn = user != null
                 if (isLoggedIn) {
                     // Define o item selecionado padrão após o login
-                    selectedItem = NavigationItem("Ordens de Serviço (OS)", "OS", Icons.Default.Home)
+                    selectedItem = NavigationItem("OS", "OS", Icons.Default.Home)
+                    currentScreen = "OS"
                 }
             }
 
@@ -53,14 +64,19 @@ class MainActivity : ComponentActivity() {
                         onNavigate = { item ->
                             selectedItem = item
                             currentScreen = item.label
+                            // Reseta estados de seleção ao mudar de tela
+                            selectedCliente = null
+                            selectedVeiculo = null
                         },
                         content = {
                             when (currentScreen) {
-                                "Ordens de Serviço (OS)" -> {
-                                    Text("Tela de Ordens de Serviço")
+                                "OS" -> {
+                                    OrdemServicoScreen(
+                                        viewModel = ordemViewModel,
+                                        onBack = { currentScreen = "home" }
+                                    )
                                 }
                                 "Clientes" -> {
-                                    val clientesViewModel: ClientesViewModel = viewModel()
                                     ClientesScreen(
                                         viewModel = clientesViewModel,
                                         onAddCliente = { currentScreen = "novo_cliente" },
@@ -79,14 +95,12 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                                 "novo_cliente" -> {
-                                    val clientesViewModel: ClientesViewModel = viewModel()
                                     NovoClienteScreen(
                                         viewModel = clientesViewModel,
                                         onBack = { currentScreen = "Clientes" }
                                     )
                                 }
                                 "Veículos" -> {
-                                    val veiculosViewModel: VeiculosViewModel = viewModel()
                                     VeiculosScreen(
                                         viewModel = veiculosViewModel,
                                         onAddVeiculo = { currentScreen = "novo_veiculo" },
@@ -105,7 +119,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                                 "novo_veiculo" -> {
-                                    val veiculosViewModel: VeiculosViewModel = viewModel()
                                     NovoVeiculoScreen(
                                         viewModel = veiculosViewModel,
                                         onBack = { currentScreen = "Veículos" }
@@ -121,6 +134,9 @@ class MainActivity : ComponentActivity() {
                                         }
                                     )
                                 }
+                                "home" -> {
+                                    Text("Tela Inicial")
+                                }
                                 else -> {
                                     Text("Tela não encontrada")
                                 }
@@ -132,8 +148,8 @@ class MainActivity : ComponentActivity() {
                 // Tela de login
                 LoginScreen(onLoginSuccess = {
                     isLoggedIn = true
-                    selectedItem = NavigationItem("Ordens de Serviço (OS)", "OS", Icons.Default.Home)
-                    currentScreen = "Ordens de Serviço (OS)"
+                    selectedItem = NavigationItem("OS", "OS", Icons.Default.List)
+                    currentScreen = "OS"
                 })
             }
         }
