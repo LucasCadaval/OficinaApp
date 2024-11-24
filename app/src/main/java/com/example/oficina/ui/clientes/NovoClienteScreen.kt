@@ -1,17 +1,25 @@
 package com.example.oficina.ui.clientes
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.oficina.models.Cliente
+import com.example.oficina.models.Veiculo
 import com.example.oficina.utils.applyCepMask
 import com.example.oficina.utils.applyCpfMask
 import com.example.oficina.utils.applyPlacaMask
+import kotlinx.coroutines.launch
 
 @Composable
 fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
+    val coroutineScope = rememberCoroutineScope()
+
     var nome by remember { mutableStateOf("") }
     var cpf by remember { mutableStateOf("") }
     var cep by remember { mutableStateOf("") }
@@ -20,59 +28,175 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
     var veiculoPlaca by remember { mutableStateOf("") }
     val veiculos = remember { mutableStateListOf<String>() }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        TextField(value = nome, onValueChange = { nome = it }, label = { Text("Nome Completo") })
+    // Estados para o buscador de veículos
+    var searchQuery by remember { mutableStateOf("") }
+    val searchResults by viewModel.searchResults.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val searchError by viewModel.searchError.collectAsState()
+
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxSize()
+    ) {
+        // Campos do Formulário
+        TextField(
+            value = nome,
+            onValueChange = { nome = it },
+            label = { Text("Nome Completo") },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
             value = cpf,
             onValueChange = { cpf = applyCpfMask(it) },
-            label = { Text("CPF") }
+            label = { Text("CPF") },
+            modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
             value = cep,
             onValueChange = { cep = applyCepMask(it) },
-            label = { Text("CEP") }
+            label = { Text("CEP") },
+            modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(value = endereco, onValueChange = { endereco = it }, label = { Text("Endereço") })
+        TextField(
+            value = endereco,
+            onValueChange = { endereco = it },
+            label = { Text("Endereço") },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(value = cidade, onValueChange = { cidade = it }, label = { Text("Cidade") })
+        TextField(
+            value = cidade,
+            onValueChange = { cidade = it },
+            label = { Text("Cidade") },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Veículos:")
+        // Lista de Veículos Selecionados
+        Text("Veículos Selecionados:")
         veiculos.forEach { placa ->
             Text(" - $placa")
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Row {
+
+        // Buscador de Veículos
+        Text("Buscar Veículo por Placa:")
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(modifier = Modifier.fillMaxWidth()) {
             TextField(
-                value = veiculoPlaca,
-                onValueChange = { veiculoPlaca = applyPlacaMask(it) },
-                label = { Text("Placa do Veículo") }
+                value = searchQuery,
+                onValueChange = { query ->
+                    searchQuery = applyPlacaMask(query)
+                },
+                label = { Text("Placa do Veículo") },
+                modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = {
-                if (veiculoPlaca.isNotBlank()) {
-                    veiculos.add(veiculoPlaca)
-                    veiculoPlaca = ""
-                }
-            }) {
-                Text("Adicionar Veículo")
+            Button(
+                onClick = {
+                    if (searchQuery.isNotBlank()) {
+                        coroutineScope.launch {
+                            viewModel.searchVeiculosByPlaca(searchQuery)
+                        }
+                    }
+                },
+                enabled = !isLoading && searchQuery.isNotBlank(),
+                modifier = Modifier.align(Alignment.CenterVertically)
+            ) {
+                Text("Buscar")
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = {
-            val cliente = Cliente(
-                nome = nome,
-                cpf = cpf,
-                cep = cep,
-                endereco = endereco,
-                cidade = cidade,
-                veiculos = veiculos.toList()
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Exibir Indicador de Carregamento
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        // Exibir Erro de Busca
+        searchError?.let { error ->
+            Text(
+                text = error,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(8.dp)
             )
-            viewModel.addCliente(cliente, onBack)
-        }) {
+        }
+
+        // Exibir Resultados da Busca
+        if (searchResults.isNotEmpty()) {
+            Text("Resultados da Busca:")
+            Spacer(modifier = Modifier.height(4.dp))
+            LazyColumn(
+                modifier = Modifier
+                    .heightIn(max = 200.dp)
+                    .fillMaxWidth()
+            ) {
+                items(searchResults) { veiculo ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clickable {
+                                veiculos.add(veiculo.placa)
+                                searchQuery = ""
+                                // Limpa os resultados após a seleção chamando o método do ViewModel
+                                viewModel.clearSearchResults()
+                            },
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(8.dp)) {
+                            Text("Placa: ${veiculo.placa}", style = MaterialTheme.typography.bodyLarge)
+                            Text("Nome: ${veiculo.nome}", style = MaterialTheme.typography.bodyMedium)
+                            Text("Marca: ${veiculo.marca}", style = MaterialTheme.typography.bodyMedium)
+                            Text("Cor: ${veiculo.cor}", style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+            }
+        } else if (!isLoading && searchQuery.isNotBlank() && searchResults.isEmpty()) {
+            Text("Nenhum veículo encontrado com a placa \"$searchQuery\".")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Botão para Salvar Cliente
+        Button(
+            onClick = {
+                // Validações básicas (pode ser expandido conforme necessário)
+                if (nome.isBlank() || cpf.isBlank() || cep.isBlank() || endereco.isBlank() || cidade.isBlank()) {
+                    // Exibir mensagem de erro ou feedback ao usuário
+                    // Implementação opcional
+                } else {
+                    val cliente = Cliente(
+                        nome = nome,
+                        cpf = cpf,
+                        cep = cep,
+                        endereco = endereco,
+                        cidade = cidade,
+                        veiculos = veiculos.toList()
+                    )
+                    coroutineScope.launch {
+                        viewModel.addCliente(
+                            cliente,
+                            onComplete = { onBack() },
+                            onFailure = { e ->
+                                // Trate o erro, por exemplo, exiba uma mensagem ao usuário
+                                // Implementação opcional
+                            }
+                        )
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = nome.isNotBlank() && cpf.isNotBlank() && cep.isNotBlank() && endereco.isNotBlank() && cidade.isNotBlank()
+        ) {
             Text("Salvar Cliente")
         }
     }
