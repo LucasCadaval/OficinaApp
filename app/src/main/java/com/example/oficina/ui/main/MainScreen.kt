@@ -3,6 +3,11 @@ package com.example.oficina.ui.main
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,10 +22,10 @@ fun MainScreen(
     content: @Composable () -> Unit
 ) {
     val items = listOf(
-        NavigationItem("Ordens de Serviço (OS)", "OS"),
-        NavigationItem("Clientes", "Clientes"),
-        NavigationItem("Veículos", "Veículos"),
-        NavigationItem("Conta", "Conta")
+        NavigationItem("OS", "OS", Icons.Default.List),
+        NavigationItem("Clientes", "Clientes", Icons.Default.Person),
+        NavigationItem("Veículos", "Veículos", Icons.Default.Build),
+        NavigationItem("Conta", "Conta", Icons.Default.AccountCircle)
     )
 
     Scaffold(
