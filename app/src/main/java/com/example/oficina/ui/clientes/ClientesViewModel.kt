@@ -38,7 +38,7 @@ class ClientesViewModel : ViewModel() {
     /**
      * Função para buscar todos os clientes uma única vez.
      */
-    private fun fetchClientes() {
+    fun fetchClientes() {
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
