@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -19,6 +20,7 @@ import androidx.compose.ui.window.Dialog
 import com.example.oficina.models.Cliente
 import com.example.oficina.models.OrdemServico
 import com.example.oficina.models.Peca
+import com.example.oficina.models.Status
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,6 +38,7 @@ fun OrdemServicoScreen(
     var pecas by remember { mutableStateOf(listOf<Peca>()) }
     var novaPecaNome by remember { mutableStateOf("") }
     var novaPecaValor by remember { mutableStateOf("") }
+    var selectedStatus by remember { mutableStateOf(Status.ABERTA) } // Novo estado para status
 
     // Estado para controlar se está adicionando uma nova ordem
     var isAddingNewOrdem by remember { mutableStateOf(false) }
@@ -58,6 +61,7 @@ fun OrdemServicoScreen(
         selectedCliente = null
         problema = ""
         pecas = emptyList()
+        selectedStatus = Status.ABERTA // Resetar status para ABERTA
         isAddingNewOrdem = true
     }
 
@@ -67,6 +71,7 @@ fun OrdemServicoScreen(
         selectedCliente = Cliente(id = ordem.clienteId, nome = ordem.clienteNome)
         problema = ordem.problema
         pecas = ordem.pecas
+        selectedStatus = ordem.status // Definir o status atual
         isAddingNewOrdem = false
     }
 
@@ -76,6 +81,7 @@ fun OrdemServicoScreen(
             selectedCliente = Cliente(id = ordemSelecionada!!.clienteId, nome = ordemSelecionada!!.clienteNome)
             problema = ordemSelecionada!!.problema
             pecas = ordemSelecionada!!.pecas
+            selectedStatus = ordemSelecionada!!.status
             isAddingNewOrdem = false
         }
     }
@@ -85,6 +91,9 @@ fun OrdemServicoScreen(
 
     // Colete o estado dos resultados da busca de clientes
     val searchResults by viewModel.searchClientesResults.collectAsState()
+
+    // Colete o estado do filtro atual
+    val filtroAtual by viewModel.filtro.collectAsState()
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -104,42 +113,50 @@ fun OrdemServicoScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
+            // Componente de Filtro
+            FiltroOrdenServico(
+                filtroAtual = filtroAtual,
+                onFiltroSelecionado = { novoFiltro ->
+                    viewModel.setFiltro(novoFiltro)
+                }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             // Lista de Ordens de Serviço
             LazyColumn(
                 modifier = Modifier
                     .weight(1f) // Faz a lista ocupar o espaço restante
             ) {
                 items(ordens) { ordem ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .clickable { openEditOrdem(ordem) },
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(8.dp)) {
-                            Text(
-                                text = "Cliente: ${ordem.clienteNome}",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = "Problema: ${ordem.problema}",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = "Valor Total: R$${String.format("%.2f", ordem.valorTotal)}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = "Peças:", style = MaterialTheme.typography.bodyMedium)
-                            ordem.pecas.forEach { peca ->
-                                Text(
-                                    text = "- ${peca.nome}: R$${String.format("%.2f", peca.valor)}",
-                                    style = MaterialTheme.typography.bodySmall
+                    OrdemServicoCard(
+                        ordem = ordem,
+                        onEdit = { openEditOrdem(ordem) },
+                        onDelete = { ordemId ->
+                            // Implementar lógica de exclusão com confirmação
+                            coroutineScope.launch {
+                                val result = snackbarHostState.showSnackbar(
+                                    message = "Deseja excluir esta ordem?",
+                                    actionLabel = "Excluir",
+                                    duration = SnackbarDuration.Short
                                 )
+                                if (result == SnackbarResult.ActionPerformed) {
+                                    viewModel.excluirOrdemServico(ordemId,
+                                        onComplete = {
+                                            coroutineScope.launch {
+                                                snackbarHostState.showSnackbar("Ordem excluída com sucesso!")
+                                            }
+                                        },
+                                        onFailure = { e ->
+                                            coroutineScope.launch {
+                                                snackbarHostState.showSnackbar("Erro ao excluir ordem: ${e.message}")
+                                            }
+                                        }
+                                    )
+                                }
                             }
                         }
-                    }
+                    )
                 }
             }
 
@@ -169,6 +186,13 @@ fun OrdemServicoScreen(
                         }
                     }
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Seleção de Status (Novo)
+                DropdownMenuBox(selectedStatus = selectedStatus, onStatusSelected = { novoStatus ->
+                    selectedStatus = novoStatus
+                })
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -269,7 +293,8 @@ fun OrdemServicoScreen(
                                 clienteNome = selectedCliente!!.nome,
                                 problema = problema,
                                 pecas = pecas,
-                                valorTotal = calcularValorTotal()
+                                valorTotal = calcularValorTotal(),
+                                status = selectedStatus // Definir o status selecionado
                             )
                             coroutineScope.launch {
                                 viewModel.saveOrdemServico(
@@ -347,23 +372,14 @@ fun OrdemServicoScreen(
                             // Lista de resultados da busca
                             LazyColumn(modifier = Modifier.height(200.dp)) {
                                 items(searchResults) { cliente ->
-                                    Card(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 4.dp)
-                                            .clickable {
-                                                selectedCliente = cliente
-                                                isDialogOpen = false
-                                                isAddingNewOrdem = false
-                                            },
-                                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                                    ) {
-                                        Column(modifier = Modifier.padding(8.dp)) {
-                                            Text(text = cliente.nome, style = MaterialTheme.typography.bodyLarge)
-                                            Text(text = "CPF: ${cliente.cpf}", style = MaterialTheme.typography.bodyMedium)
-                                            Text(text = "Endereço: ${cliente.endereco}, ${cliente.cidade}", style = MaterialTheme.typography.bodyMedium)
+                                    ClienteItem(
+                                        cliente = cliente,
+                                        onClick = {
+                                            selectedCliente = cliente
+                                            isDialogOpen = false
+                                            isAddingNewOrdem = false
                                         }
-                                    }
+                                    )
                                 }
                             }
                             Spacer(modifier = Modifier.height(8.dp))

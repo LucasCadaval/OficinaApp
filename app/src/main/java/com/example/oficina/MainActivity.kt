@@ -17,6 +17,7 @@ import com.example.oficina.ui.account.ContaScreen
 import com.example.oficina.ui.clientes.ClienteDetailsScreen
 import com.example.oficina.ui.clientes.ClientesScreen
 import com.example.oficina.ui.clientes.ClientesViewModel
+import com.example.oficina.ui.clientes.EditClienteScreen
 import com.example.oficina.ui.clientes.NovoClienteScreen
 import com.example.oficina.ui.login.LoginScreen
 import com.example.oficina.ui.main.MainScreen
@@ -90,7 +91,28 @@ class MainActivity : ComponentActivity() {
                                     selectedCliente?.let { cliente ->
                                         ClienteDetailsScreen(
                                             cliente = cliente,
-                                            onBack = { currentScreen = "Clientes" }
+                                            onBack = { currentScreen = "Clientes" },
+                                            onEdit = { currentScreen = "edit_cliente" },
+                                            onDelete = {
+                                                // Implementar a lógica de exclusão
+                                                clientesViewModel.deleteCliente(
+                                                    cliente.id,
+                                                    onComplete = { currentScreen = "Clientes" },
+                                                    onFailure = { e ->
+                                                        // Trate o erro, por exemplo, exiba uma mensagem ao usuário
+                                                        // Implementação opcional
+                                                    }
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
+                                "edit_cliente" -> {
+                                    selectedCliente?.let { cliente ->
+                                        EditClienteScreen(
+                                            cliente = cliente,
+                                            viewModel = clientesViewModel,
+                                            onBack = { currentScreen = "cliente_details" }
                                         )
                                     }
                                 }

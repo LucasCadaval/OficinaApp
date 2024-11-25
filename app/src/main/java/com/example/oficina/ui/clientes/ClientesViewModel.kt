@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.oficina.models.Cliente
 import com.example.oficina.models.Veiculo
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -26,6 +25,9 @@ class ClientesViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> get() = _isLoading
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> get() = _error
+
     private val _searchError = MutableStateFlow<String?>(null)
     val searchError: StateFlow<String?> get() = _searchError
 
@@ -34,16 +36,23 @@ class ClientesViewModel : ViewModel() {
     }
 
     /**
-     * Função para buscar todos os clientes e observar mudanças em tempo real.
+     * Função para buscar todos os clientes uma única vez.
      */
-    private fun fetchClientes() {
-        clientesCollection.addSnapshotListener { value, error ->
-            if (error != null) {
-                // Trate o erro conforme necessário
-                return@addSnapshotListener
+    fun fetchClientes() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                val snapshot = clientesCollection.get().await()
+                val clientesList = snapshot.documents.mapNotNull { document ->
+                    document.toObject(Cliente::class.java)?.copy(id = document.id)
+                }
+                _clientes.value = clientesList
+            } catch (e: Exception) {
+                _error.value = "Erro ao buscar clientes: ${e.message}"
+            } finally {
+                _isLoading.value = false
             }
-            val clientes = value?.toObjects(Cliente::class.java) ?: emptyList()
-            _clientes.value = clientes
         }
     }
 
@@ -51,9 +60,45 @@ class ClientesViewModel : ViewModel() {
      * Função para adicionar um novo cliente ao Firestore.
      */
     fun addCliente(cliente: Cliente, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
-        clientesCollection.add(cliente)
-            .addOnSuccessListener { onComplete() }
-            .addOnFailureListener { e -> onFailure(e) }
+        viewModelScope.launch {
+            try {
+                clientesCollection.add(cliente).await()
+                onComplete()
+                fetchClientes() // Atualiza a lista após adicionar
+            } catch (e: Exception) {
+                onFailure(e)
+            }
+        }
+    }
+
+    /**
+     * Função para deletar um cliente pelo ID.
+     */
+    fun deleteCliente(clienteId: String, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
+        viewModelScope.launch {
+            try {
+                clientesCollection.document(clienteId).delete().await()
+                onComplete()
+                fetchClientes() // Atualiza a lista após deletar
+            } catch (e: Exception) {
+                onFailure(e)
+            }
+        }
+    }
+
+    /**
+     * Função para atualizar um cliente existente.
+     */
+    fun updateCliente(clienteId: String, cliente: Cliente, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
+        viewModelScope.launch {
+            try {
+                clientesCollection.document(clienteId).set(cliente).await()
+                onComplete()
+                fetchClientes() // Atualiza a lista após atualizar
+            } catch (e: Exception) {
+                onFailure(e)
+            }
+        }
     }
 
     /**
@@ -72,7 +117,7 @@ class ClientesViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 // Firestore não possui operador "startsWith", mas podemos simular usando whereGreaterThanOrEqualTo e whereLessThanOrEqualTo com \uf8ff
-                val querySnapshot: QuerySnapshot = veiculosCollection
+                val querySnapshot = veiculosCollection
                     .whereGreaterThanOrEqualTo("placa", placa)
                     .whereLessThanOrEqualTo("placa", placa + "\uf8ff")
                     .get()
@@ -101,28 +146,13 @@ class ClientesViewModel : ViewModel() {
      * (Opcional, caso deseje adicionar veículos diretamente através desta ViewModel)
      */
     fun addVeiculo(veiculo: Veiculo, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
-        veiculosCollection.add(veiculo)
-            .addOnSuccessListener { onComplete() }
-            .addOnFailureListener { e -> onFailure(e) }
-    }
-
-    /**
-     * Função para deletar um cliente pelo ID.
-     */
-    fun deleteCliente(clienteId: String, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
-        clientesCollection.document(clienteId)
-            .delete()
-            .addOnSuccessListener { onComplete() }
-            .addOnFailureListener { e -> onFailure(e) }
-    }
-
-    /**
-     * Função para atualizar um cliente existente.
-     */
-    fun updateCliente(clienteId: String, cliente: Cliente, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
-        clientesCollection.document(clienteId)
-            .set(cliente)
-            .addOnSuccessListener { onComplete() }
-            .addOnFailureListener { e -> onFailure(e) }
+        viewModelScope.launch {
+            try {
+                veiculosCollection.add(veiculo).await()
+                onComplete()
+            } catch (e: Exception) {
+                onFailure(e)
+            }
+        }
     }
 }
