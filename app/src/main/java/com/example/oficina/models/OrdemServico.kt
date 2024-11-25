@@ -1,10 +1,11 @@
 package com.example.oficina.models
 
 data class OrdemServico(
-    val id: String = "", // ID gerado pelo Firestore
-    val clienteId: String = "", // Referência ao ID do cliente
-    val clienteNome: String = "", // Nome do cliente para exibição
+    val id: String = "", // Este campo será preenchido com o ID do documento no Firestore
+    val clienteId: String = "",
+    val clienteNome: String = "",
     val problema: String = "",
     val pecas: List<Peca> = emptyList(),
-    val valorTotal: Double = 150.0 // Valor inicial da mão de obra
+    val valorTotal: Double = 0.0,
+    val status: Status = Status.ABERTA
 )
