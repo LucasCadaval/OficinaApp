@@ -50,6 +50,13 @@ fun ClienteCard(
                 text = "Endereço: ${cliente.endereco}, ${cliente.cidade}",
                 style = MaterialTheme.typography.bodyMedium
             )
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Contato
+            Text(
+                text = "Contato: ${cliente.contato}",
+                style = MaterialTheme.typography.bodyMedium
+            )
             Spacer(modifier = Modifier.height(8.dp))
 
             // Veículos

@@ -58,6 +58,8 @@ fun ClienteDetailsScreen(
             Spacer(modifier = Modifier.height(8.dp))
             Text("Cidade: ${cliente.cidade}", style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(16.dp))
+            Text("Contato: ${cliente.contato}", style = MaterialTheme.typography.bodyLarge)
+            Spacer(modifier = Modifier.height(16.dp))
             Text("Veículos:", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
             if (cliente.veiculos.isNotEmpty()) {

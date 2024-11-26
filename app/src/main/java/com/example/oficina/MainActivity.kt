@@ -4,9 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.oficina.data.AppDatabase
@@ -27,10 +25,13 @@ import com.example.oficina.ui.veiculos.VeiculosViewModel
 import com.example.oficina.ui.veiculos.VeiculoDetailScreen
 import com.example.oficina.ui.ordens.OrdemServicoScreen
 import com.example.oficina.ui.ordens.OrdemServicoViewModel
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import com.example.oficina.ui.login.LoginViewModel
+import com.example.oficina.ui.register.RegisterScreen
+import com.example.oficina.ui.register.RegisterViewModel
 import com.example.oficina.ui.veiculos.EditVeiculoScreen
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +40,7 @@ class MainActivity : ComponentActivity() {
             val context = applicationContext
             var isLoggedIn by remember { mutableStateOf(false) }
             var selectedItem by remember { mutableStateOf<NavigationItem?>(null) }
-            var currentScreen by remember { mutableStateOf("home") }
+            var currentScreen by remember { mutableStateOf("Login") }
             var selectedCliente by remember { mutableStateOf<Cliente?>(null) }
             var selectedVeiculo by remember { mutableStateOf<Veiculo?>(null) }
 
@@ -47,6 +48,12 @@ class MainActivity : ComponentActivity() {
             val ordemViewModel: OrdemServicoViewModel = viewModel()
             val clientesViewModel: ClientesViewModel = viewModel()
             val veiculosViewModel: VeiculosViewModel = viewModel()
+            val loginViewModel: LoginViewModel = viewModel()
+            val registerViewModel: RegisterViewModel = viewModel()
+
+            // SnackbarHostState para gerenciar Snacbars
+            val snackbarHostState = remember { SnackbarHostState() }
+            val coroutineScope = rememberCoroutineScope()
 
             // Verifica se o usuário está logado ao iniciar
             LaunchedEffect(Unit) {
@@ -174,7 +181,7 @@ class MainActivity : ComponentActivity() {
                                         onLogout = {
                                             isLoggedIn = false
                                             selectedItem = null
-                                            currentScreen = "login"
+                                            currentScreen = "Login"
                                         }
                                     )
                                 }
@@ -189,12 +196,40 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             } else {
-                // Tela de login
-                LoginScreen(onLoginSuccess = {
-                    isLoggedIn = true
-                    selectedItem = NavigationItem("OS", "OS", Icons.Default.List)
-                    currentScreen = "OS"
-                })
+                when (currentScreen) {
+                    "Login" -> {
+                        LoginScreen(
+                            viewModel = loginViewModel,
+                            onLoginSuccess = {
+                                isLoggedIn = true
+                                selectedItem = NavigationItem("OS", "OS", Icons.Default.Home)
+                                currentScreen = "OS"
+                            },
+                            onRegisterClick = { currentScreen = "Register" }
+                        )
+                    }
+                    "Register" -> {
+                        RegisterScreen(
+                            viewModel = registerViewModel,
+                            onRegisterSuccess = {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("Registro realizado com sucesso! Por favor, faça login.")
+                                }
+                                currentScreen = "Login"
+                            },
+                            onRegisterFailure = {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("Erro ao registrar!")
+                                }
+                            },
+                            onBackToLogin = { currentScreen = "Login" }
+                        )
+                    }
+                    else -> {
+                        // Caso o currentScreen não seja "Login" nem "Register"
+                        Text("Tela não encontrada")
+                    }
+                }
             }
         }
     }

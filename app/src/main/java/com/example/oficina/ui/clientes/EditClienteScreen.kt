@@ -36,6 +36,7 @@ fun EditClienteScreen(
     var cep by remember { mutableStateOf(cliente.cep) }
     var endereco by remember { mutableStateOf(cliente.endereco) }
     var cidade by remember { mutableStateOf(cliente.cidade) }
+    var contato by remember { mutableStateOf(cliente.contato) }
     var veiculoPlaca by remember { mutableStateOf("") }
     val veiculos = remember { mutableStateListOf<String>().apply { addAll(cliente.veiculos) } }
 
@@ -87,6 +88,14 @@ fun EditClienteScreen(
             onValueChange = { cidade = it },
             label = { Text("Cidade") },
             modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = contato,
+            onValueChange = { contato = it },
+            label = { Text("Contato") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -200,7 +209,7 @@ fun EditClienteScreen(
         Button(
             onClick = {
                 // Validações básicas (pode ser expandido conforme necessário)
-                if (nome.isBlank() || cpf.isBlank() || cep.isBlank() || endereco.isBlank() || cidade.isBlank()) {
+                if (nome.isBlank() || cpf.isBlank() || cep.isBlank() || endereco.isBlank() || cidade.isBlank() || contato.isBlank()) {
                     // Exibir mensagem de erro ou feedback ao usuário
                     coroutineScope.launch {
                         // Implementação opcional de Snackbar ou outra forma de feedback
@@ -213,6 +222,7 @@ fun EditClienteScreen(
                         cep = cep,
                         endereco = endereco,
                         cidade = cidade,
+                        contato = contato,
                         veiculos = veiculos.toList()
                     )
                     coroutineScope.launch {
@@ -231,7 +241,7 @@ fun EditClienteScreen(
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = nome.isNotBlank() && cpf.isNotBlank() && cep.isNotBlank() && endereco.isNotBlank() && cidade.isNotBlank()
+            enabled = nome.isNotBlank() && cpf.isNotBlank() && cep.isNotBlank() && endereco.isNotBlank() && cidade.isNotBlank() && contato.isNotBlank()
         ) {
             Text("Salvar Alterações")
         }
