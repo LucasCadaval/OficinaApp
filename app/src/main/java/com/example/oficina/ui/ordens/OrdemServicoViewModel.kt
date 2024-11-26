@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.oficina.models.Cliente
 import com.example.oficina.models.OrdemServico
 import com.example.oficina.models.Status
+import com.example.oficina.models.Veiculo
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -24,6 +25,7 @@ class OrdemServicoViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val userId = auth.currentUser?.uid ?: ""
     private val ordensCollection = db.collection("users").document(userId).collection("ordens_servico")
+    private val veiculosCollection = db.collection("users").document(userId).collection("veiculos")
 
     // Estado das ordens de serviço
     private val _ordens = MutableStateFlow<List<OrdemServico>>(emptyList())
@@ -42,6 +44,19 @@ class OrdemServicoViewModel : ViewModel() {
 
     private val _clientesError = MutableStateFlow<String?>(null)
     val clientesError: StateFlow<String?> get() = _clientesError
+
+    // Estados para gerenciamento de busca
+    private val _searchResults = MutableStateFlow<List<Veiculo>>(emptyList())
+    val searchResults: StateFlow<List<Veiculo>> get() = _searchResults
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> get() = _isLoading
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> get() = _error
+
+    private val _searchError = MutableStateFlow<String?>(null)
+    val searchError: StateFlow<String?> get() = _searchError
 
     init {
         fetchOrdens()
@@ -121,6 +136,34 @@ class OrdemServicoViewModel : ViewModel() {
                 _clientesError.value = "Erro ao buscar clientes: ${e.message}"
             } finally {
                 _isLoadingClientes.value = false
+            }
+        }
+    }
+
+    fun searchVeiculosByPlaca(placa: String) {
+        // Inicia o processo de busca
+        _isLoading.value = true
+        _searchError.value = null
+
+        // Limpa resultados anteriores
+        _searchResults.value = emptyList()
+
+        // Realiza a busca no Firestore
+        viewModelScope.launch {
+            try {
+                // Firestore não possui operador "startsWith", mas podemos simular usando whereGreaterThanOrEqualTo e whereLessThanOrEqualTo com \uf8ff
+                val querySnapshot = veiculosCollection
+                    .whereGreaterThanOrEqualTo("placa", placa)
+                    .whereLessThanOrEqualTo("placa", placa + "\uf8ff")
+                    .get()
+                    .await()
+
+                val resultados = querySnapshot.toObjects(Veiculo::class.java)
+                _searchResults.value = resultados
+            } catch (e: Exception) {
+                _searchError.value = "Erro ao buscar veículos: ${e.message}"
+            } finally {
+                _isLoading.value = false
             }
         }
     }

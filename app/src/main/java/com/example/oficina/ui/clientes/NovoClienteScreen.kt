@@ -4,7 +4,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,10 +39,12 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
     val isLoading by viewModel.isLoading.collectAsState()
     val searchError by viewModel.searchError.collectAsState()
 
+    // Envolve todo o conteúdo em uma coluna rolável para suportar telas menores ou muito conteúdo
     Column(
         modifier = Modifier
             .padding(16.dp)
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())  // Adiciona rolagem vertical
     ) {
         // Campos do Formulário
         OutlinedTextField(
@@ -91,8 +95,18 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
 
         // Lista de Veículos Selecionados
         Text("Veículos Selecionados:")
-        veiculos.forEach { placa ->
-            Text(" - $placa")
+        if (veiculos.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .heightIn(max = 150.dp)  // Define uma altura máxima
+                    .fillMaxWidth()
+            ) {
+                items(veiculos) { placa ->
+                    Text(" - $placa")
+                }
+            }
+        } else {
+            Text("Nenhum veículo selecionado.")
         }
         Spacer(modifier = Modifier.height(8.dp))
 
