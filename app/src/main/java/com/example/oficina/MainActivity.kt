@@ -30,6 +30,7 @@ import com.example.oficina.ui.ordens.OrdemServicoViewModel
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Text
+import com.example.oficina.ui.veiculos.EditVeiculoScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -136,7 +137,28 @@ class MainActivity : ComponentActivity() {
                                     selectedVeiculo?.let { veiculo ->
                                         VeiculoDetailScreen(
                                             veiculo = veiculo,
-                                            onBack = { currentScreen = "Veículos" }
+                                            onBack = { currentScreen = "Veículos" },
+                                            onEdit = { currentScreen = "edit_veiculo" },
+                                            onDelete = {
+                                                // Implementar a lógica de exclusão
+                                                clientesViewModel.deleteCliente(
+                                                    veiculo.id,
+                                                    onComplete = { currentScreen = "Veículos" },
+                                                    onFailure = { e ->
+                                                        // Trate o erro, por exemplo, exiba uma mensagem ao usuário
+                                                        // Implementação opcional
+                                                    }
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
+                                "edit_veiculo" -> {
+                                    selectedVeiculo?.let { veiculo ->
+                                        EditVeiculoScreen(
+                                            veiculo = veiculo,
+                                            viewModel = veiculosViewModel,
+                                            onBack = { currentScreen = "veiculo_details" }
                                         )
                                     }
                                 }
