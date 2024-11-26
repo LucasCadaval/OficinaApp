@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.oficina.models.Cliente
 import com.example.oficina.models.OrdemServico
 import com.example.oficina.models.Status
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,9 @@ enum class FiltroOrdenServico {
 
 class OrdemServicoViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
-    private val ordensCollection = db.collection("ordens_servico")
+    private val auth = FirebaseAuth.getInstance()
+    private val userId = auth.currentUser?.uid ?: ""
+    private val ordensCollection = db.collection("users").document(userId).collection("ordens_servico")
 
     // Estado das ordens de serviço
     private val _ordens = MutableStateFlow<List<OrdemServico>>(emptyList())
@@ -107,7 +110,7 @@ class OrdemServicoViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val querySnapshot = FirebaseFirestore.getInstance()
-                    .collection("clientes")
+                    .collection("users").document(userId).collection("clientes")
                     .whereGreaterThanOrEqualTo("nome", nome)
                     .whereLessThanOrEqualTo("nome", nome + "\uf8ff")
                     .get()

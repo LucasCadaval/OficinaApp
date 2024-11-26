@@ -4,10 +4,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.oficina.models.Cliente
 import com.example.oficina.models.Veiculo
@@ -27,6 +29,7 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
     var cidade by remember { mutableStateOf("") }
     var veiculoPlaca by remember { mutableStateOf("") }
     val veiculos = remember { mutableStateListOf<String>() }
+    var contato by remember { mutableStateOf("") }
 
     // Estados para o buscador de veículos
     var searchQuery by remember { mutableStateOf("") }
@@ -40,39 +43,49 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
             .fillMaxSize()
     ) {
         // Campos do Formulário
-        TextField(
+        OutlinedTextField(
             value = nome,
             onValueChange = { nome = it },
             label = { Text("Nome Completo") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+        OutlinedTextField(
             value = cpf,
             onValueChange = { cpf = applyCpfMask(it) },
             label = { Text("CPF") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+        OutlinedTextField(
             value = cep,
             onValueChange = { cep = applyCepMask(it) },
             label = { Text("CEP") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+        OutlinedTextField(
             value = endereco,
             onValueChange = { endereco = it },
             label = { Text("Endereço") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+        OutlinedTextField(
             value = cidade,
             onValueChange = { cidade = it },
             label = { Text("Cidade") },
             modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = contato,
+            onValueChange = { contato = it },
+            label = { Text("Contato") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -87,7 +100,7 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
         Text("Buscar Veículo por Placa:")
         Spacer(modifier = Modifier.height(4.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
-            TextField(
+            OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { query ->
                     searchQuery = applyPlacaMask(query)
@@ -170,7 +183,7 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
         Button(
             onClick = {
                 // Validações básicas (pode ser expandido conforme necessário)
-                if (nome.isBlank() || cpf.isBlank() || cep.isBlank() || endereco.isBlank() || cidade.isBlank()) {
+                if (nome.isBlank() || cpf.isBlank() || cep.isBlank() || endereco.isBlank() || cidade.isBlank() || contato.isBlank()) {
                     // Exibir mensagem de erro ou feedback ao usuário
                     // Implementação opcional
                 } else {
@@ -180,6 +193,7 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
                         cep = cep,
                         endereco = endereco,
                         cidade = cidade,
+                        contato = contato,
                         veiculos = veiculos.toList()
                     )
                     coroutineScope.launch {
@@ -195,7 +209,7 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = nome.isNotBlank() && cpf.isNotBlank() && cep.isNotBlank() && endereco.isNotBlank() && cidade.isNotBlank()
+            enabled = nome.isNotBlank() && cpf.isNotBlank() && cep.isNotBlank() && endereco.isNotBlank() && cidade.isNotBlank() && contato.isNotBlank()
         ) {
             Text("Salvar Cliente")
         }

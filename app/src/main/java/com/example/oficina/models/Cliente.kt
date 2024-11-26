@@ -7,6 +7,7 @@ data class Cliente(
     val cep: String = "",
     val endereco: String = "",
     val cidade: String = "",
+    val contato: String = "",
     val veiculos: List<String> = emptyList() //
 )
 

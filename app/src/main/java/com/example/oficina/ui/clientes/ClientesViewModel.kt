@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.oficina.models.Cliente
 import com.example.oficina.models.Veiculo
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,8 +13,10 @@ import kotlinx.coroutines.tasks.await
 
 class ClientesViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
-    private val clientesCollection = db.collection("clientes")
-    private val veiculosCollection = db.collection("veiculos")
+    private val auth = FirebaseAuth.getInstance()
+    private val userId = auth.currentUser?.uid ?: ""
+    private val clientesCollection = db.collection("users").document(userId).collection("clientes")
+    private val veiculosCollection = db.collection("users").document(userId).collection("veiculos")
 
     private val _clientes = MutableStateFlow<List<Cliente>>(emptyList())
     val clientes: StateFlow<List<Cliente>> get() = _clientes
