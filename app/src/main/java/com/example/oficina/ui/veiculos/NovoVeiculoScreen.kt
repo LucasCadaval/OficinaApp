@@ -18,16 +18,17 @@ fun NovoVeiculoScreen(viewModel: VeiculosViewModel, onBack: () -> Unit) {
     var placa by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        TextField(value = nome, onValueChange = { nome = it }, label = { Text("Nome do Veículo") })
+        TextField(value = nome, onValueChange = { nome = it }, label = { Text("Nome do Veículo") }, modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(value = marca, onValueChange = { marca = it }, label = { Text("Marca") })
+        TextField(value = marca, onValueChange = { marca = it }, label = { Text("Marca") }, modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(value = cor, onValueChange = { cor = it }, label = { Text("Cor") })
+        TextField(value = cor, onValueChange = { cor = it }, label = { Text("Cor") }, modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
             value = placa,
             onValueChange = { placa = applyPlacaMask(it) },
             label = { Text("Placa") },
+            modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
         Spacer(modifier = Modifier.height(16.dp))
