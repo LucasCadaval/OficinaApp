@@ -2,12 +2,14 @@ package com.example.oficina.ui.ordens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.oficina.models.OrdemServico
 import com.example.oficina.models.Status
@@ -20,7 +22,7 @@ fun OrdemServicoCard(
 ) {
     val corStatus = when (ordem.status) {
         Status.ABERTA -> MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
-        Status.FINALIZADA -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+        Status.FINALIZADA -> Color.Green.copy(alpha = 0.1f)
     }
 
     Card(
@@ -28,8 +30,9 @@ fun OrdemServicoCard(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onEdit() },
-        colors = CardDefaults.cardColors(containerColor = corStatus),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -53,6 +56,10 @@ fun OrdemServicoCard(
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
+                text = "Mão-de-obra: R$150,00",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
                 text = "Valor Total: R$${String.format("%.2f", ordem.valorTotal)}",
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -70,7 +77,7 @@ fun OrdemServicoCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = when (ordem.status) {
                     Status.ABERTA -> MaterialTheme.colorScheme.error
-                    Status.FINALIZADA -> MaterialTheme.colorScheme.primary
+                    Status.FINALIZADA -> Color.Green
                 }
             )
         }
