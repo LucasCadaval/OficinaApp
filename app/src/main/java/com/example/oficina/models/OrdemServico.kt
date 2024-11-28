@@ -7,5 +7,6 @@ data class OrdemServico(
     val problema: String = "",
     val pecas: List<Peca> = emptyList(),
     val valorTotal: Double = 0.0,
-    val status: Status = Status.ABERTA
+    val status: Status = Status.ABERTA,
+    val veiculos: List<String> = emptyList()
 )

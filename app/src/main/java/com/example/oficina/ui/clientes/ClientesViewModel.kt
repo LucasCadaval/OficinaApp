@@ -14,9 +14,14 @@ import kotlinx.coroutines.tasks.await
 class ClientesViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
-    private val userId = auth.currentUser?.uid ?: ""
-    private val clientesCollection = db.collection("users").document(userId).collection("clientes")
-    private val veiculosCollection = db.collection("users").document(userId).collection("veiculos")
+    private val userId = auth.currentUser?.uid
+
+    private val clientesCollection = userId?.let {
+        db.collection("users").document(it).collection("clientes")
+    }
+    private val veiculosCollection = userId?.let {
+        db.collection("users").document(it).collection("veiculos")
+    }
 
     private val _clientes = MutableStateFlow<List<Cliente>>(emptyList())
     val clientes: StateFlow<List<Cliente>> get() = _clientes
@@ -34,14 +39,26 @@ class ClientesViewModel : ViewModel() {
     private val _searchError = MutableStateFlow<String?>(null)
     val searchError: StateFlow<String?> get() = _searchError
 
+    private val _authError = MutableStateFlow<String?>(null)
+    val authError: StateFlow<String?> get() = _authError
+
     init {
-        fetchClientes()
+        if (userId == null) {
+            _authError.value = "Usuário não autenticado. Faça login para continuar."
+        } else {
+            fetchClientes()
+        }
     }
 
     /**
      * Função para buscar todos os clientes uma única vez.
      */
     fun fetchClientes() {
+        if (clientesCollection == null) {
+            _error.value = "Usuário não autenticado. Não é possível buscar clientes."
+            return
+        }
+
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
@@ -63,6 +80,11 @@ class ClientesViewModel : ViewModel() {
      * Função para adicionar um novo cliente ao Firestore.
      */
     fun addCliente(cliente: Cliente, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
+        if (clientesCollection == null) {
+            onFailure(IllegalStateException("Usuário não autenticado. Não é possível adicionar clientes."))
+            return
+        }
+
         viewModelScope.launch {
             try {
                 clientesCollection.add(cliente).await()
@@ -78,6 +100,11 @@ class ClientesViewModel : ViewModel() {
      * Função para deletar um cliente pelo ID.
      */
     fun deleteCliente(clienteId: String, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
+        if (clientesCollection == null) {
+            onFailure(IllegalStateException("Usuário não autenticado. Não é possível deletar clientes."))
+            return
+        }
+
         viewModelScope.launch {
             try {
                 clientesCollection.document(clienteId).delete().await()
@@ -93,6 +120,11 @@ class ClientesViewModel : ViewModel() {
      * Função para atualizar um cliente existente.
      */
     fun updateCliente(clienteId: String, cliente: Cliente, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
+        if (clientesCollection == null) {
+            onFailure(IllegalStateException("Usuário não autenticado. Não é possível atualizar clientes."))
+            return
+        }
+
         viewModelScope.launch {
             try {
                 clientesCollection.document(clienteId).set(cliente).await()
@@ -106,20 +138,19 @@ class ClientesViewModel : ViewModel() {
 
     /**
      * Função para buscar veículos no Firestore com base na placa fornecida.
-     * Utiliza uma query para buscar placas que começam com a string fornecida.
      */
     fun searchVeiculosByPlaca(placa: String) {
-        // Inicia o processo de busca
+        if (veiculosCollection == null) {
+            _searchError.value = "Usuário não autenticado. Não é possível buscar veículos."
+            return
+        }
+
         _isLoading.value = true
         _searchError.value = null
-
-        // Limpa resultados anteriores
         _searchResults.value = emptyList()
 
-        // Realiza a busca no Firestore
         viewModelScope.launch {
             try {
-                // Firestore não possui operador "startsWith", mas podemos simular usando whereGreaterThanOrEqualTo e whereLessThanOrEqualTo com \uf8ff
                 val querySnapshot = veiculosCollection
                     .whereGreaterThanOrEqualTo("placa", placa)
                     .whereLessThanOrEqualTo("placa", placa + "\uf8ff")
@@ -142,20 +173,5 @@ class ClientesViewModel : ViewModel() {
     fun clearSearchResults() {
         _searchResults.value = emptyList()
         _searchError.value = null
-    }
-
-    /**
-     * Função para adicionar um veículo ao Firestore (se necessário).
-     * (Opcional, caso deseje adicionar veículos diretamente através desta ViewModel)
-     */
-    fun addVeiculo(veiculo: Veiculo, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
-        viewModelScope.launch {
-            try {
-                veiculosCollection.add(veiculo).await()
-                onComplete()
-            } catch (e: Exception) {
-                onFailure(e)
-            }
-        }
     }
 }

@@ -17,6 +17,8 @@ fun NovoVeiculoScreen(viewModel: VeiculosViewModel, onBack: () -> Unit) {
     var cor by remember { mutableStateOf("") }
     var placa by remember { mutableStateOf("") }
 
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
     Column(modifier = Modifier.padding(16.dp)) {
         TextField(value = nome, onValueChange = { nome = it }, label = { Text("Nome do Veículo") }, modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(8.dp))
@@ -33,8 +35,21 @@ fun NovoVeiculoScreen(viewModel: VeiculosViewModel, onBack: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
-            val veiculo = Veiculo(nome = nome, marca = marca, cor = cor, placa = placa)
-            viewModel.addVeiculo(veiculo, onBack)
+            if (nome.isBlank() || marca.isBlank() || cor.isBlank() || placa.isBlank()) {
+                errorMessage = "Todos os campos devem ser preenchidos."
+            } else {
+                val veiculo = Veiculo(nome = nome, marca = marca, cor = cor, placa = placa)
+                viewModel.addVeiculo(
+                    veiculo,
+                    onComplete = {
+                        errorMessage = null // Limpa erros após sucesso
+                        onBack()
+                    },
+                    onFailure = { e ->
+                        errorMessage = "Erro ao salvar veículo: ${e.message}"
+                    }
+                )
+            }
         }) {
             Text("Salvar Veículo")
         }
