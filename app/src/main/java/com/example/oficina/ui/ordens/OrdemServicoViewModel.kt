@@ -38,7 +38,7 @@ class OrdemServicoViewModel : ViewModel() {
     val ordens: StateFlow<List<OrdemServico>> get() = _ordens
 
     // Estado para controle de filtro
-    private val _filtro = MutableStateFlow(FiltroOrdenServico.TODAS)
+    private val _filtro = MutableStateFlow(FiltroOrdenServico.ABERTAS)
     val filtro: StateFlow<FiltroOrdenServico> get() = _filtro
 
     // Estados para clientes
@@ -143,7 +143,6 @@ class OrdemServicoViewModel : ViewModel() {
         }
     }
 
-    // Funções para buscar clientes
     fun searchClientesByNome(nome: String) {
         if (userId == null) {
             _clientesError.value = "Usuário não autenticado. Não é possível buscar clientes."

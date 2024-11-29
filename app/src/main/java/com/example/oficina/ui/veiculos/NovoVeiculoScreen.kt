@@ -20,13 +20,13 @@ fun NovoVeiculoScreen(viewModel: VeiculosViewModel, onBack: () -> Unit) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        TextField(value = nome, onValueChange = { nome = it }, label = { Text("Nome do Veículo") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = nome, onValueChange = { nome = it }, label = { Text("Nome do Veículo") }, modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(value = marca, onValueChange = { marca = it }, label = { Text("Marca") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = marca, onValueChange = { marca = it }, label = { Text("Marca") }, modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(value = cor, onValueChange = { cor = it }, label = { Text("Cor") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = cor, onValueChange = { cor = it }, label = { Text("Cor") }, modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+        OutlinedTextField(
             value = placa,
             onValueChange = { placa = applyPlacaMask(it) },
             label = { Text("Placa") },
@@ -42,7 +42,7 @@ fun NovoVeiculoScreen(viewModel: VeiculosViewModel, onBack: () -> Unit) {
                 viewModel.addVeiculo(
                     veiculo,
                     onComplete = {
-                        errorMessage = null // Limpa erros após sucesso
+                        errorMessage = null
                         onBack()
                     },
                     onFailure = { e ->

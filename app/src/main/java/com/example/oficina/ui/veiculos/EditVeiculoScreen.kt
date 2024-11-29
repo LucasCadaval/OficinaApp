@@ -36,7 +36,6 @@ fun EditVeiculoScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // Campos do Formulário
         OutlinedTextField(
             value = nome,
             onValueChange = { nome = it },
@@ -67,7 +66,6 @@ fun EditVeiculoScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Exibe mensagem de erro, se houver
         if (errorMessage != null) {
             Text(
                 text = errorMessage!!,
@@ -76,7 +74,6 @@ fun EditVeiculoScreen(
             )
         }
 
-        // Botão para Salvar Alterações
         Button(
             onClick = {
                 if (nome.isBlank() || marca.isBlank() || cor.isBlank() || placa.isBlank()) {
@@ -109,7 +106,6 @@ fun EditVeiculoScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botão para Excluir Veículo
         Button(
             onClick = {
                 coroutineScope.launch {

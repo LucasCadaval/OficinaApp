@@ -2,6 +2,7 @@ package com.example.oficina.ui.login
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -17,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -49,7 +51,8 @@ fun LoginScreen(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(

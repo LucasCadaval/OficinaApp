@@ -99,7 +99,6 @@ fun EditClienteScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Lista de Veículos Selecionados
         Text("Veículos Selecionados:", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(8.dp))
         veiculos.forEachIndexed { index, placa ->
@@ -118,7 +117,6 @@ fun EditClienteScreen(
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Buscador de Veículos
         Text("Buscar Veículo por Placa:", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(4.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -149,13 +147,11 @@ fun EditClienteScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Exibir Indicador de Carregamento
         if (isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Exibir Erro de Busca
         searchError?.let { error ->
             Text(
                 text = error,
@@ -165,7 +161,6 @@ fun EditClienteScreen(
             )
         }
 
-        // Exibir Resultados da Busca
         if (searchResults.isNotEmpty()) {
             Text("Resultados da Busca:", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(4.dp))
@@ -182,7 +177,6 @@ fun EditClienteScreen(
                             .clickable {
                                 veiculos.add(veiculo.placa)
                                 searchQuery = ""
-                                // Limpa os resultados após a seleção chamando o método do ViewModel
                                 viewModel.clearSearchResults()
                             },
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -205,14 +199,10 @@ fun EditClienteScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botão para Salvar Alterações
         Button(
             onClick = {
-                // Validações básicas (pode ser expandido conforme necessário)
                 if (nome.isBlank() || cpf.isBlank() || cep.isBlank() || endereco.isBlank() || cidade.isBlank() || contato.isBlank()) {
-                    // Exibir mensagem de erro ou feedback ao usuário
                     coroutineScope.launch {
-                        // Implementação opcional de Snackbar ou outra forma de feedback
                     }
                 } else {
                     val clienteAtualizado = Cliente(
@@ -231,9 +221,7 @@ fun EditClienteScreen(
                             clienteAtualizado,
                             onComplete = { onBack() },
                             onFailure = { e ->
-                                // Trate o erro, por exemplo, exiba uma mensagem ao usuário
                                 coroutineScope.launch {
-                                    // Implementação opcional de Snackbar ou outra forma de feedback
                                 }
                             }
                         )

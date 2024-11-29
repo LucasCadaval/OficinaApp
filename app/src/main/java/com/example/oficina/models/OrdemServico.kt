@@ -1,7 +1,7 @@
 package com.example.oficina.models
 
 data class OrdemServico(
-    val id: String = "", // Este campo será preenchido com o ID do documento no Firestore
+    val id: String = "",
     val clienteId: String = "",
     val clienteNome: String = "",
     val problema: String = "",

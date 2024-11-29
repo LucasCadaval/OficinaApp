@@ -17,15 +17,11 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun ContaScreen(context: Context, onLogout: () -> Unit) {
-    // Estado para armazenar o email do usuário
     var email by remember { mutableStateOf<String?>(null) }
 
-    // CoroutineScope para operações assíncronas
     val coroutineScope = rememberCoroutineScope()
 
-    // Recuperar o email do usuário logado quando o Composable for iniciado
     LaunchedEffect(Unit) {
-        // Executar a operação no dispatcher IO para evitar bloqueio da UI
         withContext(Dispatchers.IO) {
             val user: User? = AppDatabase.getDatabase(context).userDao().getLoggedInUser()
             email = user?.email
@@ -39,7 +35,6 @@ fun ContaScreen(context: Context, onLogout: () -> Unit) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Exibir o email se estiver disponível
             if (email != null) {
                 Text(text = "Bem-vindo, $email!")
             } else {
@@ -51,9 +46,7 @@ fun ContaScreen(context: Context, onLogout: () -> Unit) {
             Button(
                 onClick = {
                     coroutineScope.launch(Dispatchers.IO) {
-                        // Limpar o usuário logado do banco de dados
                         AppDatabase.getDatabase(context).userDao().clearUser()
-                        // Chamar a função de logout
                         onLogout()
                     }
                 }

@@ -50,9 +50,7 @@ class ClientesViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Função para buscar todos os clientes uma única vez.
-     */
+
     fun fetchClientes() {
         if (clientesCollection == null) {
             _error.value = "Usuário não autenticado. Não é possível buscar clientes."
@@ -76,9 +74,7 @@ class ClientesViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Função para adicionar um novo cliente ao Firestore.
-     */
+
     fun addCliente(cliente: Cliente, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
         if (clientesCollection == null) {
             onFailure(IllegalStateException("Usuário não autenticado. Não é possível adicionar clientes."))
@@ -89,16 +85,14 @@ class ClientesViewModel : ViewModel() {
             try {
                 clientesCollection.add(cliente).await()
                 onComplete()
-                fetchClientes() // Atualiza a lista após adicionar
+                fetchClientes()
             } catch (e: Exception) {
                 onFailure(e)
             }
         }
     }
 
-    /**
-     * Função para deletar um cliente pelo ID.
-     */
+
     fun deleteCliente(clienteId: String, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
         if (clientesCollection == null) {
             onFailure(IllegalStateException("Usuário não autenticado. Não é possível deletar clientes."))
@@ -116,9 +110,7 @@ class ClientesViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Função para atualizar um cliente existente.
-     */
+
     fun updateCliente(clienteId: String, cliente: Cliente, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
         if (clientesCollection == null) {
             onFailure(IllegalStateException("Usuário não autenticado. Não é possível atualizar clientes."))
@@ -129,16 +121,14 @@ class ClientesViewModel : ViewModel() {
             try {
                 clientesCollection.document(clienteId).set(cliente).await()
                 onComplete()
-                fetchClientes() // Atualiza a lista após atualizar
+                fetchClientes()
             } catch (e: Exception) {
                 onFailure(e)
             }
         }
     }
 
-    /**
-     * Função para buscar veículos no Firestore com base na placa fornecida.
-     */
+
     fun searchVeiculosByPlaca(placa: String) {
         if (veiculosCollection == null) {
             _searchError.value = "Usuário não autenticado. Não é possível buscar veículos."
@@ -167,9 +157,7 @@ class ClientesViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Função para limpar os resultados da busca.
-     */
+
     fun clearSearchResults() {
         _searchResults.value = emptyList()
         _searchError.value = null

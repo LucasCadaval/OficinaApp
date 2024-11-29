@@ -1,5 +1,6 @@
 package com.example.oficina.ui.ordens
 
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.oficina.models.Cliente
@@ -28,7 +30,6 @@ fun EditOrdemServico(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    // Form states
     var selectedCliente by remember { mutableStateOf<Cliente?>(null) }
     var problema by remember { mutableStateOf("") }
     var pecas by remember { mutableStateOf(listOf<Peca>()) }
@@ -37,7 +38,6 @@ fun EditOrdemServico(
     var selectedStatus by remember { mutableStateOf(Status.ABERTA) }
     val veiculos = remember { mutableStateListOf<String>() }
 
-    // Initialize form with selected order data
     LaunchedEffect(ordemSelecionada) {
         if (ordemSelecionada != null) {
             selectedCliente = Cliente(id = ordemSelecionada.clienteId, nome = ordemSelecionada.clienteNome)
@@ -49,10 +49,34 @@ fun EditOrdemServico(
         }
     }
 
-    // Function to calculate total value
     fun calcularValorTotal(): Double {
         val pecasTotal = pecas.sumOf { it.valor }
         return 150.0 + pecasTotal
+    }
+
+    fun gerarRelatorio(): String {
+        val valorTotal = calcularValorTotal()
+        val listaPecas = pecas.joinToString("\n") { "Peça: ${it.nome} - R$${String.format("%.2f", it.valor)}" }
+        return """
+            Ordem de Serviço:
+            Cliente: ${selectedCliente?.nome}
+            Problema: $problema
+            Status: $selectedStatus
+            Veículos: ${veiculos.joinToString(", ")}
+            Peças:
+            $listaPecas
+            Valor Total: R$${String.format("%.2f", valorTotal)}
+        """.trimIndent()
+    }
+
+    val context = LocalContext.current
+    fun compartilharRelatorio(relatorio: String) {
+        val intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, relatorio)
+            type = "text/plain"
+        }
+        context.startActivity(Intent.createChooser(intent, "Compartilhar Relatório"))
     }
 
     LazyColumn(
@@ -60,7 +84,6 @@ fun EditOrdemServico(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Header
         item {
             Text(
                 text = "Editar Ordem de Serviço",
@@ -69,7 +92,6 @@ fun EditOrdemServico(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Client Section
         item {
             OutlinedTextField(
                 value = selectedCliente?.nome ?: "",
@@ -81,7 +103,6 @@ fun EditOrdemServico(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Status Selection
         item {
             DropdownMenuBox(selectedStatus = selectedStatus, onStatusSelected = { novoStatus ->
                 selectedStatus = novoStatus
@@ -89,7 +110,6 @@ fun EditOrdemServico(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Selected Vehicles
         item {
             Text("Veículos Selecionados:")
             if (veiculos.isNotEmpty()) {
@@ -108,7 +128,6 @@ fun EditOrdemServico(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Problem Description
         item {
             OutlinedTextField(
                 value = problema,
@@ -120,7 +139,6 @@ fun EditOrdemServico(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Parts List
         itemsIndexed(pecas) { index, peca ->
             Row(
                 modifier = Modifier
@@ -141,7 +159,6 @@ fun EditOrdemServico(
             }
         }
 
-        // Add New Part Section
         item {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "Adicionar Peça:", style = MaterialTheme.typography.bodyLarge)
@@ -185,7 +202,6 @@ fun EditOrdemServico(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Total Value Section
         item {
             Text(
                 text = "Valor Total: R$${String.format("%.2f", calcularValorTotal())}",
@@ -194,7 +210,6 @@ fun EditOrdemServico(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Save Changes Button
         item {
             Button(
                 onClick = {
@@ -237,5 +252,18 @@ fun EditOrdemServico(
                 Text("Salvar Alterações")
             }
         }
+
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                val relatorio = gerarRelatorio()
+                compartilharRelatorio(relatorio)
+            }) {
+                Text("Gerar e Compartilhar Relatório")
+            }
+        }
     }
 }
+

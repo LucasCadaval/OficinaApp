@@ -75,7 +75,6 @@ fun ClienteDetailsScreen(
             }
         }
 
-        // Diálogo de Confirmação de Deleção
         if (showDeleteDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },

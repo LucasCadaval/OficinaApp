@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -22,13 +23,17 @@ fun OrdemServicoScreen(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // State for the list of orders
     val ordens by viewModel.ordens.collectAsState()
     val filtroAtual by viewModel.filtro.collectAsState()
 
-    // State to control which screen to show
     var currentScreen by remember { mutableStateOf("list") }
     var ordemSelecionada by remember { mutableStateOf<OrdemServico?>(null) }
+
+    var searchQuery by remember { mutableStateOf("") }
+
+    val filteredOrdens = ordens.filter { ordem ->
+        ordem.clienteNome.contains(searchQuery, ignoreCase = true)
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -48,7 +53,6 @@ fun OrdemServicoScreen(
     ) { innerPadding ->
         when (currentScreen) {
             "list" -> {
-                // Display the list of orders
                 LazyColumn(
                     modifier = Modifier
                         .padding(innerPadding)
@@ -56,7 +60,18 @@ fun OrdemServicoScreen(
                         .fillMaxSize()
                 ) {
                     item {
-                        // Filter Component
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            placeholder = { Text("Pesquisar cliente") },
+                            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Pesquisar") },
+                            singleLine = true
+                        )
+                    }
+                    item {
                         FiltroOrdenServico(
                             filtroAtual = filtroAtual,
                             onFiltroSelecionado = { novoFiltro ->
@@ -66,7 +81,7 @@ fun OrdemServicoScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    items(ordens) { ordem ->
+                    items(filteredOrdens) { ordem ->
                         OrdemServicoCard(
                             ordem = ordem,
                             onEdit = {
@@ -101,7 +116,6 @@ fun OrdemServicoScreen(
                 }
             }
             "create" -> {
-                // Navigate to NovaOrdemServico
                 NovaOrdemServico(
                     viewModel = viewModel,
                     onBack = { currentScreen = "list" },
@@ -109,7 +123,6 @@ fun OrdemServicoScreen(
                 )
             }
             "edit" -> {
-                // Navigate to EditOrdemServico
                 EditOrdemServico(
                     viewModel = viewModel,
                     ordemSelecionada = ordemSelecionada,

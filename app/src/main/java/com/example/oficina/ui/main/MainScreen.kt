@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,7 +26,7 @@ fun MainScreen(
         NavigationItem("OS", "OS", Icons.Default.List),
         NavigationItem("Clientes", "Clientes", Icons.Default.Person),
         NavigationItem("Veículos", "Veículos", Icons.Default.Build),
-        NavigationItem("Conta", "Conta", Icons.Default.AccountCircle)
+        NavigationItem("Conta", "Conta", Icons.Default.Settings)
     )
 
     Scaffold(

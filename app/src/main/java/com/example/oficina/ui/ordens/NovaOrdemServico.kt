@@ -31,7 +31,6 @@ fun NovaOrdemServico(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    // Form states
     var selectedCliente by remember { mutableStateOf<Cliente?>(null) }
     var problema by remember { mutableStateOf("") }
     var pecas by remember { mutableStateOf(listOf<Peca>()) }
@@ -40,16 +39,13 @@ fun NovaOrdemServico(
     var selectedStatus by remember { mutableStateOf(Status.ABERTA) }
     val veiculos = remember { mutableStateListOf<String>() }
 
-    // Vehicle search states
     var searchQuery by remember { mutableStateOf("") }
     val searchResults by viewModel.searchResults.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val searchError by viewModel.searchError.collectAsState()
 
-    // Client selection dialog state
     var isDialogOpen by remember { mutableStateOf(false) }
 
-    // Function to calculate total value
     fun calcularValorTotal(): Double {
         val pecasTotal = pecas.sumOf { it.valor }
         return 150.0 + pecasTotal
@@ -58,9 +54,8 @@ fun NovaOrdemServico(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp) // Ensures proper spacing
+            .padding(16.dp)
     ) {
-        // Header Section
         item {
             Text(
                 text = "Nova Ordem de Serviço",
@@ -69,7 +64,6 @@ fun NovaOrdemServico(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Client Selection
         item {
             OutlinedTextField(
                 value = selectedCliente?.nome ?: "",
@@ -88,7 +82,6 @@ fun NovaOrdemServico(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Status Selection
         item {
             DropdownMenuBox(selectedStatus = selectedStatus, onStatusSelected = { novoStatus ->
                 selectedStatus = novoStatus
@@ -96,13 +89,12 @@ fun NovaOrdemServico(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Vehicle List Section
         item {
             Text("Veículos Selecionados:")
             if (veiculos.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier
-                        .heightIn(max = 150.dp) // Constrain height to prevent infinite constraints
+                        .heightIn(max = 150.dp)
                         .fillMaxWidth()
                 ) {
                     items(veiculos) { placa ->
@@ -115,7 +107,6 @@ fun NovaOrdemServico(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Vehicle Search Section
         item {
             Text("Buscar Veículo por Placa:")
             Spacer(modifier = Modifier.height(4.dp))
@@ -146,7 +137,6 @@ fun NovaOrdemServico(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Loading Indicator or Search Error
         item {
             if (isLoading) {
                 CircularProgressIndicator(
@@ -167,7 +157,6 @@ fun NovaOrdemServico(
             }
         }
 
-        // Search Results
         if (searchResults.isNotEmpty()) {
             item {
                 Text("Resultados da Busca:")
@@ -199,7 +188,6 @@ fun NovaOrdemServico(
             }
         }
 
-        // Problem Description
         item {
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
@@ -213,7 +201,6 @@ fun NovaOrdemServico(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Parts List
         itemsIndexed(pecas) { index, peca ->
             Row(
                 modifier = Modifier
@@ -233,7 +220,6 @@ fun NovaOrdemServico(
             }
         }
 
-        // Add New Part Section
         item {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "Adicionar Peça:", style = MaterialTheme.typography.bodyLarge)
@@ -277,7 +263,6 @@ fun NovaOrdemServico(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Total Value
         item {
             Text(
                 text = "Valor Total: R$${String.format("%.2f", calcularValorTotal())}",
@@ -286,7 +271,6 @@ fun NovaOrdemServico(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Save Button
         item {
             Button(
                 onClick = {
@@ -330,7 +314,6 @@ fun NovaOrdemServico(
             }
         }
 
-        // Client Selection Dialog
         if (isDialogOpen) {
             item {
                 ClientSelectionDialog(

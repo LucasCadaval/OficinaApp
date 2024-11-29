@@ -39,9 +39,7 @@ class VeiculosViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Função para buscar todos os veículos.
-     */
+
     fun fetchVeiculos() {
         if (veiculosCollection == null) {
             _error.value = "Usuário não autenticado. Não é possível buscar veículos."
@@ -68,9 +66,7 @@ class VeiculosViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Função para adicionar um veículo ao Firestore.
-     */
+
     fun addVeiculo(veiculo: Veiculo, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
         if (veiculosCollection == null) {
             onFailure(IllegalStateException("Usuário não autenticado. Não é possível adicionar veículos."))
@@ -88,9 +84,7 @@ class VeiculosViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Função para deletar um veículo pelo ID.
-     */
+
     fun deleteVeiculo(veiculoId: String, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
         if (veiculosCollection == null) {
             onFailure(IllegalStateException("Usuário não autenticado. Não é possível excluir veículos."))
@@ -108,9 +102,7 @@ class VeiculosViewModel : ViewModel() {
     }
 
 
-    /**
-     * Função para atualizar um veículo existente.
-     */
+
     fun updateVeiculo(veiculoId: String, veiculo: Veiculo, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
         if (veiculosCollection == null) {
             onFailure(IllegalStateException("Usuário não autenticado. Não é possível atualizar veículos."))

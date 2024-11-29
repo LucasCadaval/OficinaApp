@@ -54,7 +54,6 @@ fun ClientSelectionDialog(
                     }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                // Loading Indicator or Error Message
                 if (isLoadingClientes) {
                     CircularProgressIndicator(
                         modifier = Modifier
@@ -66,7 +65,6 @@ fun ClientSelectionDialog(
                     Text(text = error, color = MaterialTheme.colorScheme.error)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                // Search Results
                 LazyColumn(modifier = Modifier.height(200.dp)) {
                     items(searchClientesResults) { cliente ->
                         ClienteItem(
@@ -79,7 +77,6 @@ fun ClientSelectionDialog(
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                // Cancel Button
                 Button(
                     onClick = {
                         onDismiss()

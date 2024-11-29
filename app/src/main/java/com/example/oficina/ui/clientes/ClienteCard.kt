@@ -24,42 +24,36 @@ fun ClienteCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Nome do Cliente
             Text(
                 text = cliente.nome,
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            // CPF
             Text(
                 text = "CPF: ${cliente.cpf}",
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(4.dp))
 
-            // CEP
             Text(
                 text = "CEP: ${cliente.cep}",
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Endereço
             Text(
                 text = "Endereço: ${cliente.endereco}, ${cliente.cidade}",
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Contato
             Text(
                 text = "Contato: ${cliente.contato}",
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Veículos
             if (cliente.veiculos.isNotEmpty()) {
                 Text(
                     text = "Veículos:",
