@@ -4,7 +4,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,8 +43,8 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
         modifier = Modifier
             .padding(16.dp)
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
     ) {
-        // Campos do Formulário
         OutlinedTextField(
             value = nome,
             onValueChange = { nome = it },
@@ -89,14 +91,12 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Lista de Veículos Selecionados
         Text("Veículos Selecionados:")
         veiculos.forEach { placa ->
             Text(" - $placa")
         }
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Buscador de Veículos
         Text("Buscar Veículo por Placa:")
         Spacer(modifier = Modifier.height(4.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -126,13 +126,11 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Exibir Indicador de Carregamento
         if (isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Exibir Erro de Busca
         searchError?.let { error ->
             Text(
                 text = error,
@@ -142,7 +140,6 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
             )
         }
 
-        // Exibir Resultados da Busca
         if (searchResults.isNotEmpty()) {
             Text("Resultados da Busca:")
             Spacer(modifier = Modifier.height(4.dp))
@@ -159,7 +156,6 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
                             .clickable {
                                 veiculos.add(veiculo.placa)
                                 searchQuery = ""
-                                // Limpa os resultados após a seleção chamando o método do ViewModel
                                 viewModel.clearSearchResults()
                             },
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -179,13 +175,9 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botão para Salvar Cliente
         Button(
             onClick = {
-                // Validações básicas (pode ser expandido conforme necessário)
                 if (nome.isBlank() || cpf.isBlank() || cep.isBlank() || endereco.isBlank() || cidade.isBlank() || contato.isBlank()) {
-                    // Exibir mensagem de erro ou feedback ao usuário
-                    // Implementação opcional
                 } else {
                     val cliente = Cliente(
                         nome = nome,
@@ -201,8 +193,6 @@ fun NovoClienteScreen(viewModel: ClientesViewModel, onBack: () -> Unit) {
                             cliente,
                             onComplete = { onBack() },
                             onFailure = { e ->
-                                // Trate o erro, por exemplo, exiba uma mensagem ao usuário
-                                // Implementação opcional
                             }
                         )
                     }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +26,12 @@ fun VeiculosScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
+    var searchQuery by remember { mutableStateOf("") }
+
+    val filteredVeiculos = veiculos.filter { veiculo ->
+        veiculo.placa.contains(searchQuery, ignoreCase = true)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -40,26 +47,12 @@ fun VeiculosScreen(
             )
         }
     ) { innerPadding ->
-//        LazyColumn(modifier = Modifier.padding(innerPadding)) {
-//            items(veiculos) { veiculo ->
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .clickable { onVeiculoClick(veiculo) } // Chama a função de callback ao clicar
-//                        .padding(16.dp)
-//                ) {
-//                    Text(veiculo.nome)
-//                }
-//            }
-//        }
         Box(modifier = Modifier.padding(innerPadding)) {
             when {
                 isLoading -> {
-                    // Indicador de Carregamento
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 error != null -> {
-                    // Exibir Mensagem de Erro
                     Text(
                         text = error ?: "Erro desconhecido",
                         color = MaterialTheme.colorScheme.error,
@@ -67,7 +60,6 @@ fun VeiculosScreen(
                     )
                 }
                 veiculos.isEmpty() -> {
-                    // Mensagem para Lista Vazia
                     Text(
                         text = "Nenhum veículo encontrado.",
                         modifier = Modifier.align(Alignment.Center),
@@ -75,13 +67,24 @@ fun VeiculosScreen(
                     )
                 }
                 else -> {
-                    // Lista de Veiculos em Cards
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp)
                     ) {
-                        items(veiculos) { veiculo ->
+                        item{
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp),
+                                placeholder = { Text("Pesquisar veículo") },
+                                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Pesquisar") },
+                                singleLine = true
+                            )
+                        }
+                        items(filteredVeiculos) { veiculo ->
                             VeiculoCard(
                                 veiculo = veiculo,
                                 onClick = { onVeiculoClick(veiculo) }

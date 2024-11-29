@@ -27,28 +27,24 @@ fun VeiculoCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Nome do Cliente
             Text(
                 text = "Placa: ${veiculo.placa}",
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            // CPF
             Text(
                 text = "Modelo: ${veiculo.nome}",
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(4.dp))
 
-            // CEP
             Text(
                 text = "Marca: ${veiculo.marca}",
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Endereço
             Text(
                 text = "Cor: ${veiculo.cor}",
                 style = MaterialTheme.typography.bodyMedium

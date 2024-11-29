@@ -14,7 +14,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.oficina.models.Status
 
-// Componente para seleção de status
 @Composable
 fun DropdownMenuBox(selectedStatus: Status, onStatusSelected: (Status) -> Unit) {
     var expanded by remember { mutableStateOf(false) }

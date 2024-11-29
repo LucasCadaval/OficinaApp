@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +25,12 @@ fun ClientesScreen(
     val clientes by viewModel.clientes.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+
+    var searchQuery by remember { mutableStateOf("") }
+
+    val filteredClientes = clientes.filter { cliente ->
+        cliente.nome.contains(searchQuery, ignoreCase = true)
+    }
 
     Scaffold(
         topBar = {
@@ -43,11 +50,9 @@ fun ClientesScreen(
         Box(modifier = Modifier.padding(innerPadding)) {
             when {
                 isLoading -> {
-                    // Indicador de Carregamento
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 error != null -> {
-                    // Exibir Mensagem de Erro
                     Text(
                         text = error ?: "Erro desconhecido",
                         color = MaterialTheme.colorScheme.error,
@@ -55,7 +60,6 @@ fun ClientesScreen(
                     )
                 }
                 clientes.isEmpty() -> {
-                    // Mensagem para Lista Vazia
                     Text(
                         text = "Nenhum cliente encontrado.",
                         modifier = Modifier.align(Alignment.Center),
@@ -63,13 +67,24 @@ fun ClientesScreen(
                     )
                 }
                 else -> {
-                    // Lista de Clientes em Cards
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp)
                     ) {
-                        items(clientes) { cliente ->
+                        item{
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp),
+                                placeholder = { Text("Pesquisar cliente") },
+                                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Pesquisar") },
+                                singleLine = true
+                            )
+                        }
+                        items(filteredClientes) { cliente ->
                             ClienteCard(
                                 cliente = cliente,
                                 onClick = { onClienteClick(cliente) }

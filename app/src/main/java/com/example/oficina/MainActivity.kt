@@ -44,23 +44,19 @@ class MainActivity : ComponentActivity() {
             var selectedCliente by remember { mutableStateOf<Cliente?>(null) }
             var selectedVeiculo by remember { mutableStateOf<Veiculo?>(null) }
 
-            // ViewModels
             val ordemViewModel: OrdemServicoViewModel = viewModel()
             val clientesViewModel: ClientesViewModel = viewModel()
             val veiculosViewModel: VeiculosViewModel = viewModel()
             val loginViewModel: LoginViewModel = viewModel()
             val registerViewModel: RegisterViewModel = viewModel()
 
-            // SnackbarHostState para gerenciar Snacbars
             val snackbarHostState = remember { SnackbarHostState() }
             val coroutineScope = rememberCoroutineScope()
 
-            // Verifica se o usuário está logado ao iniciar
             LaunchedEffect(Unit) {
                 val user = AppDatabase.getDatabase(context).userDao().getLoggedInUser()
                 isLoggedIn = user != null
                 if (isLoggedIn) {
-                    // Define o item selecionado padrão após o login
                     selectedItem = NavigationItem("OS", "OS", Icons.Default.Home)
                     currentScreen = "OS"
                 }
@@ -73,7 +69,6 @@ class MainActivity : ComponentActivity() {
                         onNavigate = { item ->
                             selectedItem = item
                             currentScreen = item.label
-                            // Reseta estados de seleção ao mudar de tela
                             selectedCliente = null
                             selectedVeiculo = null
                         },
@@ -102,13 +97,11 @@ class MainActivity : ComponentActivity() {
                                             onBack = { currentScreen = "Clientes" },
                                             onEdit = { currentScreen = "edit_cliente" },
                                             onDelete = {
-                                                // Implementar a lógica de exclusão
                                                 clientesViewModel.deleteCliente(
                                                     cliente.id,
                                                     onComplete = { currentScreen = "Clientes" },
                                                     onFailure = { e ->
-                                                        // Trate o erro, por exemplo, exiba uma mensagem ao usuário
-                                                        // Implementação opcional
+
                                                     }
                                                 )
                                             }
@@ -152,8 +145,7 @@ class MainActivity : ComponentActivity() {
                                                     veiculo.id,
                                                     onComplete = { currentScreen = "Veículos" },
                                                     onFailure = { e ->
-                                                        // Trate o erro, por exemplo, exiba uma mensagem ao usuário
-                                                        // Implementação opcional
+
                                                     }
                                                 )
                                             }
@@ -226,7 +218,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     else -> {
-                        // Caso o currentScreen não seja "Login" nem "Register"
                         Text("Tela não encontrada")
                     }
                 }

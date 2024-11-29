@@ -28,13 +28,14 @@ fun EditVeiculoScreen(
     var cor by remember { mutableStateOf(veiculo.cor) }
     var placa by remember { mutableStateOf(veiculo.placa) }
 
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
     Column(
         modifier = Modifier
             .padding(16.dp)
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // Campos do Formulário
         OutlinedTextField(
             value = nome,
             onValueChange = { nome = it },
@@ -58,18 +59,25 @@ fun EditVeiculoScreen(
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = placa,
-            onValueChange = { placa = it },
+            onValueChange = { placa = applyPlacaMask(it) },
             label = { Text("Placa") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botão para Salvar Alterações
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage!!,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
+
         Button(
             onClick = {
                 if (nome.isBlank() || marca.isBlank() || cor.isBlank() || placa.isBlank()) {
-                    // Implementar validações adicionais se necessário
+                    errorMessage = "Todos os campos devem ser preenchidos."
                 } else {
                     val veiculoAtualizado = Veiculo(
                         id = veiculo.id,
@@ -84,10 +92,7 @@ fun EditVeiculoScreen(
                             veiculoAtualizado,
                             onComplete = { onBack() },
                             onFailure = { e ->
-                                // Trate o erro, por exemplo, exiba uma mensagem ao usuário
-                                coroutineScope.launch {
-                                    // Implementação opcional de Snackbar ou outra forma de feedback
-                                }
+                                errorMessage = "Erro ao salvar alterações: ${e.message}"
                             }
                         )
                     }
@@ -98,6 +103,27 @@ fun EditVeiculoScreen(
         ) {
             Text("Salvar Alterações")
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    viewModel.deleteVeiculo(
+                        veiculo.id,
+                        onComplete = { onBack() },
+                        onFailure = { e ->
+                            errorMessage = "Erro ao excluir veículo: ${e.message}"
+                        }
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+        ) {
+            Text("Excluir Veículo")
+        }
     }
 }
+
 

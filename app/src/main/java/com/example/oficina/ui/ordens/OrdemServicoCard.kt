@@ -73,7 +73,7 @@ fun OrdemServicoCard(
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Status: ${ordem.status.name}",
+                text = ordem.status.name,
                 style = MaterialTheme.typography.bodyMedium,
                 color = when (ordem.status) {
                     Status.ABERTA -> MaterialTheme.colorScheme.error
