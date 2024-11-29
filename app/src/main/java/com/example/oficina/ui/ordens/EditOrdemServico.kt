@@ -1,8 +1,9 @@
 package com.example.oficina.ui.ordens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -11,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.oficina.models.Cliente
@@ -27,6 +29,7 @@ fun EditOrdemServico(
     snackbarHostState: SnackbarHostState
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     // Form states
     var selectedCliente by remember { mutableStateOf<Cliente?>(null) }
@@ -53,6 +56,41 @@ fun EditOrdemServico(
     fun calcularValorTotal(): Double {
         val pecasTotal = pecas.sumOf { it.valor }
         return 150.0 + pecasTotal
+    }
+
+    // Function to generate report text
+    fun gerarRelatorio(): String {
+        val veiculosTexto = veiculos.joinToString(separator = "\n") { " - $it" }
+        val pecasTexto = pecas.joinToString(separator = "\n") { peca ->
+            " - ${peca.nome}: R$${String.format("%.2f", peca.valor)}"
+        }
+        return """
+            Ordem de Serviço
+            ------------------------------
+            Cliente: ${selectedCliente?.nome ?: "N/A"}
+            Problema: $problema
+            
+            Veículos:
+            $veiculosTexto
+            
+            Peças:
+            $pecasTexto
+            
+            Status: ${selectedStatus.name}
+            
+            Valor Total: R$${String.format("%.2f", calcularValorTotal())}
+        """.trimIndent()
+    }
+
+    // Function to share the report
+    fun compartilharRelatorio() {
+        val relatorio = gerarRelatorio()
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, relatorio)
+            putExtra(Intent.EXTRA_SUBJECT, "Relatório da Ordem de Serviço")
+        }
+        context.startActivity(Intent.createChooser(intent, "Compartilhar Relatório"))
     }
 
     LazyColumn(
@@ -92,18 +130,8 @@ fun EditOrdemServico(
         // Selected Vehicles
         item {
             Text("Veículos Selecionados:")
-            if (veiculos.isNotEmpty()) {
-                LazyColumn(
-                    modifier = Modifier
-                        .heightIn(max = 150.dp)
-                        .fillMaxWidth()
-                ) {
-                    items(veiculos) { placa ->
-                        Text(" - $placa")
-                    }
-                }
-            } else {
-                Text("Nenhum veículo selecionado.")
+            veiculos.forEach {
+                Text(" - $it")
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -235,6 +263,16 @@ fun EditOrdemServico(
                 enabled = selectedCliente != null && problema.isNotBlank()
             ) {
                 Text("Salvar Alterações")
+            }
+        }
+
+        // Generate Report Button
+        item {
+            Button(
+                onClick = { compartilharRelatorio() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Gerar e Compartilhar Relatório")
             }
         }
     }
